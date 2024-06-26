@@ -7,6 +7,7 @@ const JobList = () => {
     const [keyword, setKeyword] = useState('');
     const [location, setLocation] = useState('');
     const [loading, setLoading] = useState(false);
+    const [searchMessage, setSearchMessage] = useState('');
 
     const fetchJobs = async () => {
         try {
@@ -15,6 +16,11 @@ const JobList = () => {
             const data = await response.json();
             setJobs(data.jobs);
             setLoading(false);
+            if (data.jobs.length === 0) {
+                setSearchMessage('Search results not found.');
+            } else {
+                setSearchMessage('');
+            }
         } catch (error) {
             setLoading(false);
             console.error('Error fetching jobs:', error);
@@ -61,27 +67,34 @@ const JobList = () => {
                     />
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {jobs.map((job, index) => (
-                        <div key={index} className="bg-white p-4 rounded flex flex-col justify-around shadow-md">
-                            <div>
-                                <h2 className="text-xl font-bold">{job.title}</h2>
-                                <a href={job.companyURL} className="text-sky-500 hover:text-sky-700">{job.companyName}</a>
-                            </div>
-                            <div className='flex justify-between flex-row'>
-                                <div>
-                                    <p className="text-gray-700">{job.jobLocation}</p>
-                                    <p className="text-gray-700">{job.jobDuration}</p>
+                <>
+                    {searchMessage && <p className="text-red-500 text-center mb-4">{searchMessage}</p>}
+                    {jobs.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {jobs.map((job, index) => (
+                                <div key={job._id} className="bg-white p-4 rounded flex flex-col justify-around shadow-md">
+                                    <div>
+                                        <h2 className="text-xl font-bold">{job.title}</h2>
+                                        <a href={job.companyURL} className="text-sky-500 hover:text-sky-700">{job.companyName}</a>
+                                    </div>
+                                    <div className='flex justify-between flex-row'>
+                                        <div>
+                                            <p className="text-gray-700">{job.jobLocation}</p>
+                                            <p className="text-gray-700">{job.jobDuration}</p>
+                                        </div>
+                                        <span>
+                                            <button className='bg-sky-500 p-2 rounded-md text-white'>
+                                                <a href={job.jobURL} className="text-white">View Job</a>
+                                            </button>
+                                        </span>
+                                    </div>
                                 </div>
-                                <span>
-                                    <button className='bg-sky-500 p-2 rounded-md text-white'>
-                                        <a href={job.jobURL} className="text-white">View Job</a>
-                                    </button>
-                                </span>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    ) : (
+                        <p className="text-red-500 text-center">No jobs found matching your search criteria.</p>
+                    )}
+                </>
             )}
         </div>
     );
